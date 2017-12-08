@@ -4262,6 +4262,7 @@ jQuery.extend({
 		// tabIndex设置光标切换的顺序 => 是一个HTML属性，给元素设置该属性，光标就会沿着该属性值从小到大的顺序切换
 		tabIndex: {
 			get: function( elem ) {
+				// rfocusable
 				return elem.hasAttribute( "tabindex" ) || rfocusable.test( elem.nodeName ) || elem.href ?
 					elem.tabIndex :
 					-1;
