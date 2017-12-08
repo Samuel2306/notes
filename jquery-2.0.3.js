@@ -4184,6 +4184,9 @@ jQuery.extend({
 	removeAttr: function( elem, value ) {
 		var name, propName,
 			i = 0,
+			// core_rnotwhite: '/\S+/g',尽可能多的去匹配连续的非空白字符
+			// match方法会返回一个数组，所以attrNames是一个数组，为啥需要得到一个数组呢？！
+			// 调用match方法是为了可以一次删除多个属性：$("input").removeAttr("type value name")	
 			attrNames = value && value.match( core_rnotwhite );
 
 		if ( attrNames && elem.nodeType === 1 ) {
@@ -4236,6 +4239,7 @@ jQuery.extend({
 
 		notxml = nType !== 1 || !jQuery.isXMLDoc( elem );
 
+		//notxml 判断是不是XML
 		if ( notxml ) {
 			// Fix name and attach hooks
 			name = jQuery.propFix[ name ] || name;
@@ -4255,6 +4259,7 @@ jQuery.extend({
 	},
 
 	propHooks: {
+		// tabIndex设置光标切换的顺序 => 是一个HTML属性，给元素设置该属性，光标就会沿着该属性值从小到大的顺序切换
 		tabIndex: {
 			get: function( elem ) {
 				return elem.hasAttribute( "tabindex" ) || rfocusable.test( elem.nodeName ) || elem.href ?
