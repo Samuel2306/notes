@@ -58,6 +58,8 @@
   // of the passed-in callback, to be repeatedly applied in other Underscore
   // functions.
   var createCallback = function(func, context, argCount) {
+    // void 0就是undefined，那为什么要用void 0呢？
+    // 除了防止被重写外，还可以减少字节
     if (context === void 0) return func;
     switch (argCount == null ? 3 : argCount) {
       case 1: return function(value) {
@@ -98,6 +100,7 @@
     if (obj == null) return obj;
     iteratee = createCallback(iteratee, context);
     var i, length = obj.length;
+    // length === +length说明是数组或者类数组对象，否则就是普通对象
     if (length === +length) {
       for (i = 0; i < length; i++) {
         iteratee(obj[i], i, obj);
@@ -108,10 +111,14 @@
         iteratee(obj[keys[i]], keys[i], obj);
       }
     }
+    // 直接返回obj对象是为了方便链式调用
     return obj;
   };
 
   // Return the results of applying the iteratee to each element.
+  // 通过变换函数（iteratee迭代器）把list中的每个值映射到一个新的数组中（产生一个新的数组）。
+  // 如果存在原生的map方法，就用原生map方法来代替。
+  // 如果list是个JavaScript对象，iteratee的参数是(value, key, list)
   _.map = _.collect = function(obj, iteratee, context) {
     if (obj == null) return [];
     iteratee = _.iteratee(iteratee, context);
@@ -130,12 +137,23 @@
 
   // **Reduce** builds up a single result from a list of values, aka `inject`,
   // or `foldl`.
+  // reduce方法把list中元素归结为一个单独的数值，比如说将数组中所有元素求和
+  /**
+   * [inject description]
+   * @param  {[type]} obj      [元素]
+   * @param  {[type]} iteratee [每次遍历使用的函数]
+   * @param  {[type]} memo     [可选，reduce函数的初始值]
+   * @param  {[type]} context  [可选，指定的上下文]
+   * @return {[type]}          [description]
+   */
   _.reduce = _.foldl = _.inject = function(obj, iteratee, memo, context) {
     if (obj == null) obj = [];
     iteratee = createCallback(iteratee, context, 4);
     var keys = obj.length !== +obj.length && _.keys(obj),
         length = (keys || obj).length,
         index = 0, currentKey;
+    //如果没有memo传给reduce，列表中的第一个元素就不
+    //会调用遍历函数，这个元素将作为memo传给下一次的iteratee
     if (arguments.length < 3) {
       if (!length) throw new TypeError(reduceError);
       memo = obj[keys ? keys[index++] : index++];
@@ -144,10 +162,12 @@
       currentKey = keys ? keys[index] : index;
       memo = iteratee(memo, obj[currentKey], currentKey, obj);
     }
+    //返回最后一个值
     return memo;
   };
 
   // The right-associative version of reduce, also known as `foldr`.
+  // 从右侧开始组合的元素的reduce函数
   _.reduceRight = _.foldr = function(obj, iteratee, memo, context) {
     if (obj == null) obj = [];
     iteratee = createCallback(iteratee, context, 4);
@@ -166,9 +186,19 @@
   };
 
   // Return the first value which passes a truth test. Aliased as `detect`.
+  /**
+   * [逐项检验，返回第一个从检验函数返回真值的元素值]
+   * @param  {[type]} obj       [list对象]
+   * @param  {[type]} predicate [检验函数]
+   * @param  {[type]} context   [上下文]
+   * @return {[type]}           [description]
+   */
   _.find = _.detect = function(obj, predicate, context) {
     var result;
     predicate = _.iteratee(predicate, context);
+    // 实际是依靠some方法进行逐项检验，只是把自定义的检验函数放到
+    // 了some方法的检验函数里面
+    // some是javascript的内置方法，在第一次返回true时就跳出整个循环
     _.some(obj, function(value, index, list) {
       if (predicate(value, index, list)) {
         result = value;
@@ -180,6 +210,8 @@
 
   // Return all the elements that pass a truth test.
   // Aliased as `select`.
+  // 遍历obj里面的每个值，返回包含所有通过predicate真值检验的元素值
+  // 如果存在原生的filter方法，则用原生的filter方法
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
     if (obj == null) return results;
@@ -191,12 +223,15 @@
   };
 
   // Return all the elements for which a truth test fails.
+  // 返回list中没有通过predicate真值检测的元素集合，与filter相反
   _.reject = function(obj, predicate, context) {
     return _.filter(obj, _.negate(_.iteratee(predicate)), context);
   };
 
   // Determine whether all of the elements match a truth test.
   // Aliased as `all`.
+  // 如果list中的所有元素都通过predicate的真值检测就返回true。
+  // （如果存在原生的every方法，就使用原生的every。）
   _.every = _.all = function(obj, predicate, context) {
     if (obj == null) return true;
     predicate = _.iteratee(predicate, context);
