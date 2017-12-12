@@ -247,6 +247,9 @@
 
   // Determine if at least one element in the object matches a truth test.
   // Aliased as `any`.
+  // 如果list中有任何一个元素通过 predicate 的真值检测就返回true。
+  // 一旦找到了符合条件的元素, 就直接中断对list的遍历. 
+  // （如果存在原生的some方法，就使用原生的some。）
   _.some = _.any = function(obj, predicate, context) {
     if (obj == null) return false;
     predicate = _.iteratee(predicate, context);
@@ -262,34 +265,48 @@
 
   // Determine if the array or object contains a given value (using `===`).
   // Aliased as `include`.
+  // 如果list包含指定的value则返回true（使用===检测）。
+  // 如果list 是数组，内部使用indexOf判断
   _.contains = _.include = function(obj, target) {
     if (obj == null) return false;
+    //_.values方法将obj里面每一项的值取出来，组成一个新的数组
     if (obj.length !== +obj.length) obj = _.values(obj);
     return _.indexOf(obj, target) >= 0;
   };
 
   // Invoke a method (with arguments) on every item in a collection.
+  // 在list的每个元素上面执行method方法。
   _.invoke = function(obj, method) {
+    // 任何传递给invoke的额外参数，invoke都会在调用method方法的时候传递给它
     var args = slice.call(arguments, 2);
     var isFunc = _.isFunction(method);
     return _.map(obj, function(value) {
+      // 如果method不是一个方法，就用value[method]去代替它
       return (isFunc ? method : value[method]).apply(value, args);
     });
   };
 
   // Convenience version of a common use case of `map`: fetching a property.
+  // 获取对象数组中每个对象的某个属性值，返回一个数组
   _.pluck = function(obj, key) {
+    // _.property方法应该是获取指定属性的值
     return _.map(obj, _.property(key));
   };
 
   // Convenience version of a common use case of `filter`: selecting only objects
   // containing specific `key:value` pairs.
+  // 遍历obj当中每一个值，返回一个数组，这个数组包含attrs
+  // 所列出的属性的所有的键值对
+  // _.where(listOfPlays, {author: "Shakespeare", year: 1611});
+      // => [{title: "Cymbeline", author: "Shakespeare", year: 1611},
+      //    {title: "The Tempest", author: "Shakespeare", year: 1611}]
   _.where = function(obj, attrs) {
     return _.filter(obj, _.matches(attrs));
   };
 
   // Convenience version of a common use case of `find`: getting the first object
   // containing specific `key:value` pairs.
+  // findWhere方法其实跟where类似，只不过他值返回第一个匹配的元素
   _.findWhere = function(obj, attrs) {
     return _.find(obj, _.matches(attrs));
   };
