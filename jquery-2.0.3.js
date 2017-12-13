@@ -5079,29 +5079,50 @@ if ( !jQuery.support.focusinBubbles ) {
 }
 
 jQuery.fn.extend({
-
+	/*
+	 * on方法有两种用法：
+	 * 1、jQueryObject.on( events [, selector ] [, data ], handler )
+	 * 2、jQueryObject.on( eventsMap [, selector ] [, data ] )
+	 * events：string类型，一个或者多个用空格分隔的事件类型和可选的命名空间，例如"click"、"focus click"、"keydown.myPlugin"。myPlugin就是我们自定义的命名空间
+	 * eventsMap：一个object对象，每个属性名是对应事件类型和可选命名空间，属性值是对应的处理函数
+	 * selector：可选参数，string类型的jQuery选择器，用于指定哪些后代元素可以触发绑定的事件，如果该参数为null或者省略，则表示当前元素自身绑定事件
+	 * data：可选/任意类型，触发事件时，需要通过event.data传递给事件处理函数的任意数据
+	 * handler: Function类型，指定的事件处理函数
+	 * 返回值：返回当前jQuery对象本身
+	 */
 	on: function( types, selector, data, fn, /*INTERNAL*/ one ) {
+		debugger
 		var origFn, type;
 
 		// Types can be a map of types/handlers
+		// 传入的事件类型可以是一个事件处理映射图对象，这样就可以同时响应多个事件
 		if ( typeof types === "object" ) {
 			// ( types-Object, selector, data )
+			// 当selector类型不是string且data不存在，我们就认为selector是被省略了
+			// 并且将selector设置为undefined
 			if ( typeof selector !== "string" ) {
 				// ( types-Object, data )
 				data = data || selector;
 				selector = undefined;
 			}
+			//遍历事件映射对象，再次调用on方法
+			//传入的data属性被所有事件类型的处理函数共用
 			for ( type in types ) {
 				this.on( type, selector, data, types[ type ], one );
 			}
 			return this;
 		}
 
+		//data和fn为空时，认为传入的第二个参数是处理函数
+		//selector, data都是可选参数
 		if ( data == null && fn == null ) {
 			// ( types, fn )
 			fn = selector;
 			data = selector = undefined;
 		} else if ( fn == null ) {
+			//fn为null，就判断selector的类型
+			//selector为string，将data的值附给fn
+			//selector不是string，将data的值附给fn，将selector的值附给data
 			if ( typeof selector === "string" ) {
 				// ( types, selector, fn )
 				fn = data;
@@ -5113,6 +5134,8 @@ jQuery.fn.extend({
 				selector = undefined;
 			}
 		}
+		//如果事件处理函数handler仅仅只为返回false值，可以直接将handler设为false
+		//jquery内部会去将一个定义好的返回false的函数附给fn
 		if ( fn === false ) {
 			fn = returnFalse;
 		} else if ( !fn ) {
@@ -5127,6 +5150,7 @@ jQuery.fn.extend({
 				return origFn.apply( this, arguments );
 			};
 			// Use same guid so caller can remove using origFn
+			// guid应该是对应着某个元素的某个事件响应机制
 			fn.guid = origFn.guid || ( origFn.guid = jQuery.guid++ );
 		}
 		return this.each( function() {
