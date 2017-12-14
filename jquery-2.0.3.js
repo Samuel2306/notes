@@ -4398,6 +4398,7 @@ jQuery.event = {
 		}
 
 		// Make sure that the handler has a unique ID, used to find/remove it later
+		// 确保每个处理函数都有唯一对应的id，方便后面查找和删除
 		if ( !handler.guid ) {
 			handler.guid = jQuery.guid++;
 		}
@@ -5091,7 +5092,6 @@ jQuery.fn.extend({
 	 * 返回值：返回当前jQuery对象本身
 	 */
 	on: function( types, selector, data, fn, /*INTERNAL*/ one ) {
-		debugger
 		var origFn, type;
 
 		// Types can be a map of types/handlers
